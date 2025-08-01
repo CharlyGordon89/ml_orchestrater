@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: ml-orchestrator
+Version: 0.1.0
+Summary: Pipeline orchestrator module for modular ML system
+Author: Ruslan Mamedov
+Requires-Dist: pandas
+Requires-Dist: scikit-learn
+Requires-Dist: joblib
