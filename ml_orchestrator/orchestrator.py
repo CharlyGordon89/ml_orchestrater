@@ -2,26 +2,21 @@ import yaml
 import logging
 from pathlib import Path
 
-# Placeholder imports — replace with real modules
-# from ml_data_loader.loader import load_data
-# from ml_preprocessor import Preprocessor
-# from ml_trainer import Trainer
-# from ml_evaluator import Evaluator
-# from ml_predictor import Predictor
-# from ml_explainer import Explainer
+from ml_data_loader.loader import load_data
+from ml_preprocessor import Preprocessor
+from ml_trainer import Trainer
+from ml_evaluator import Evaluator
+from ml_predictor import Predictor
 
 class PipelineOrchestrator:
     def __init__(self, config_path: str):
         self.config = self._load_config(config_path)
         self.logger = self._init_logger()
 
-        # Initialize components (stubbed for now)
-        self.loader = None  # Replace with DataLoader()
-        self.preprocessor = None  # Replace with Preprocessor()
-        self.trainer = None  # Replace with Trainer()
-        self.evaluator = None  # Replace with Evaluator()
-        self.predictor = None  # Replace with Predictor()
-        self.explainer = None  # Replace with Explainer()
+        self.preprocessor = Preprocessor()
+        self.trainer = Trainer()
+        self.evaluator = Evaluator()
+        self.predictor = Predictor()
 
         self.logger.info("PipelineOrchestrator initialized.")
 
@@ -38,15 +33,30 @@ class PipelineOrchestrator:
         return logging.getLogger("PipelineOrchestrator")
 
     def run(self):
-        self.logger.info("Starting pipeline execution...")
+        try:
+            self.logger.info("🔹 Loading data...")
+            df = load_data(**self.config["load"])
 
-        # Placeholder flow
-        self.logger.info("Loading data...")
-        self.logger.info("Preprocessing data...")
-        self.logger.info("Training model...")
-        self.logger.info("Evaluating model...")
-        self.logger.info("Making predictions...")
-        self.logger.info("Explaining predictions...")
+            self.logger.info("🔹 Preprocessing data...")
+            X_train, X_test, y_train, y_test = self.preprocessor.process(df, **self.config["preprocess"])
 
-        self.logger.info("Pipeline execution complete.")
+            self.logger.info("🔹 Training model...")
+            model = self.trainer.train(X_train, y_train, **self.config["train"])
 
+            self.logger.info("🔹 Evaluating model...")
+            metrics = self.evaluator.evaluate(model, X_test, y_test, **self.config.get("evaluate", {}))
+            self.logger.info(f"✅ Evaluation results: {metrics}")
+
+            self.logger.info("🔹 Making predictions...")
+            preds = self.predictor.predict(model, X_test)
+
+            # Optional: call to explainer
+            if hasattr(self, "explainer") and self.explainer:
+                self.logger.info("🔹 Explaining predictions...")
+                self.explainer.explain(model, X_test)
+
+            self.logger.info("✅ Pipeline execution completed successfully.")
+
+        except Exception as e:
+            self.logger.exception(f"❌ Pipeline failed: {e}")
+            raise
