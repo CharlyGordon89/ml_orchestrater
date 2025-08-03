@@ -1,0 +1,11 @@
+load:
+  path: "data/train.csv"
+  file_format: "csv"
+
+preprocess:
+  target_column: "target"
+
+train:
+  model_type: "RandomForestClassifier"
+  model_params:
+    n_estimators: 100
